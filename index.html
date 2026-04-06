@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🔬 Scientific Number Scanner</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --pink:    #ff85a1;
+      --pink2:   #ffb3c6;
+      --purple:  #c084fc;
+      --purple2: #e9d5ff;
+      --yellow:  #fde68a;
+      --mint:    #6ee7b7;
+      --bg:      #fff0f5;
+      --card:    #ffffff;
+      --text:    #4b2067;
+      --sub:     #9d6bb5;
+      --shadow:  rgba(192, 132, 252, 0.25);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* floating blobs */
+    body::before, body::after {
+      content: '';
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: .45;
+      pointer-events: none;
+      z-index: 0;
+    }
+    body::before {
+      width: 420px; height: 420px;
+      background: radial-gradient(circle, #ffb3c6, #e9d5ff);
+      top: -80px; left: -100px;
+    }
+    body::after {
+      width: 380px; height: 380px;
+      background: radial-gradient(circle, #c084fc, #6ee7b7);
+      bottom: -80px; right: -80px;
+    }
+
+    /* ---------- CARD ---------- */
+    .card {
+      background: var(--card);
+      border-radius: 28px;
+      padding: 42px 40px 36px;
+      max-width: 540px;
+      width: 100%;
+      box-shadow: 0 12px 48px var(--shadow), 0 2px 8px rgba(0,0,0,.06);
+      border: 2.5px solid var(--purple2);
+      position: relative;
+      z-index: 1;
+      animation: popIn .5s cubic-bezier(.34,1.56,.64,1) both;
+    }
+    @keyframes popIn {
+      from { opacity:0; transform: scale(.88) translateY(24px); }
+      to   { opacity:1; transform: scale(1)  translateY(0); }
+    }
+
+    /* deco dots on card */
+    .card::before {
+      content: '✦ ✦ ✦';
+      font-size: 10px;
+      color: var(--purple);
+      letter-spacing: 6px;
+      position: absolute;
+      top: 16px; right: 20px;
+      opacity: .5;
+    }
+
+    /* ---------- TITLE ---------- */
+    .title-wrap { text-align: center; margin-bottom: 28px; }
+    .title-icon {
+      font-size: 52px;
+      display: inline-block;
+      animation: wobble 3s ease-in-out infinite;
+      filter: drop-shadow(0 4px 8px rgba(192,132,252,.4));
+    }
+    @keyframes wobble {
+      0%,100% { transform: rotate(-4deg) scale(1); }
+      50%      { transform: rotate(4deg) scale(1.08); }
+    }
+    h1 {
+      font-family: 'Fredoka One', sans-serif;
+      font-size: 1.9rem;
+      color: var(--text);
+      line-height: 1.2;
+      margin-top: 8px;
+      background: linear-gradient(135deg, #a855f7, #ec4899);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .subtitle {
+      font-size: .92rem;
+      color: var(--sub);
+      font-weight: 600;
+      margin-top: 6px;
+    }
+
+    /* ---------- INPUT ---------- */
+    label {
+      display: block;
+      font-weight: 800;
+      font-size: .95rem;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    label span { color: var(--pink); }
+
+    .input-wrap {
+      position: relative;
+      margin-bottom: 20px;
+    }
+    .input-wrap .icon {
+      position: absolute;
+      left: 16px; top: 50%;
+      transform: translateY(-50%);
+      font-size: 18px;
+      pointer-events: none;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 14px 16px 14px 46px;
+      border: 2.5px solid var(--purple2);
+      border-radius: 16px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+      background: #fdf4ff;
+      outline: none;
+      transition: border-color .25s, box-shadow .25s, background .25s;
+    }
+    input[type="text"]::placeholder { color: #c4a8d8; font-weight: 600; }
+    input[type="text"]:focus {
+      border-color: var(--purple);
+      background: #fff;
+      box-shadow: 0 0 0 4px rgba(192,132,252,.2);
+    }
+
+    /* ---------- EXAMPLES ---------- */
+    .examples {
+      margin-bottom: 24px;
+    }
+    .examples p {
+      font-size: .8rem;
+      font-weight: 700;
+      color: var(--sub);
+      margin-bottom: 8px;
+    }
+    .pills { display: flex; flex-wrap: wrap; gap: 8px; }
+    .pill {
+      background: var(--purple2);
+      color: var(--text);
+      border: none;
+      border-radius: 999px;
+      padding: 5px 14px;
+      font-family: 'Nunito', sans-serif;
+      font-size: .78rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: background .2s, transform .15s;
+    }
+    .pill:hover { background: var(--purple); color: #fff; transform: scale(1.06); }
+
+    /* ---------- BUTTON ---------- */
+    .check-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, #a855f7, #ec4899);
+      color: #fff;
+      border: none;
+      border-radius: 18px;
+      font-family: 'Fredoka One', sans-serif;
+      font-size: 1.15rem;
+      letter-spacing: .5px;
+      cursor: pointer;
+      transition: transform .18s, box-shadow .18s, filter .18s;
+      box-shadow: 0 6px 20px rgba(168,85,247,.4);
+    }
+    .check-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 28px rgba(168,85,247,.45);
+      filter: brightness(1.06);
+    }
+    .check-btn:active { transform: scale(.97); }
+
+    /* ---------- RESULT ---------- */
+    .result {
+      margin-top: 22px;
+      border-radius: 18px;
+      padding: 18px 20px;
+      font-weight: 800;
+      font-size: 1rem;
+      text-align: center;
+      opacity: 0;
+      transform: scale(.9) translateY(8px);
+      transition: opacity .35s, transform .35s cubic-bezier(.34,1.56,.64,1);
+      pointer-events: none;
+    }
+    .result.show {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+      pointer-events: auto;
+    }
+    .result.yes {
+      background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+      color: #065f46;
+      border: 2px solid #6ee7b7;
+    }
+    .result.no {
+      background: linear-gradient(135deg, #ffe4e6, #fecdd3);
+      color: #9f1239;
+      border: 2px solid var(--pink2);
+    }
+    .result-emoji { font-size: 2rem; display: block; margin-bottom: 4px; }
+
+    /* ---------- BALLOONS ---------- */
+    .balloon-container {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 999;
+      overflow: hidden;
+    }
+    .balloon {
+      position: absolute;
+      bottom: -80px;
+      font-size: 2.2rem;
+      animation: riseUp 3.5s ease-in forwards;
+    }
+    @keyframes riseUp {
+      0%   { bottom: -80px; opacity: 1; }
+      80%  { opacity: 1; }
+      100% { bottom: 110%; opacity: 0; }
+    }
+
+    /* ---------- DIVIDER ---------- */
+    hr {
+      border: none;
+      border-top: 2px dashed var(--purple2);
+      margin: 28px 0 16px;
+    }
+
+    /* ---------- FOOTER ---------- */
+    footer {
+      text-align: center;
+      font-size: .78rem;
+      color: var(--sub);
+      font-weight: 700;
+      line-height: 1.6;
+    }
+    footer strong { color: var(--pink); }
+  </style>
+</head>
+<body>
+
+<div class="balloon-container" id="balloonArea"></div>
+
+<div class="card">
+  <div class="title-wrap">
+    <div class="title-icon">🔬</div>
+    <h1>Scientific Number Scanner</h1>
+    <p class="subtitle">Type a number — I'll tell you if it's scientific notation! 🌝</p>
+  </div>
+
+  <label for="numInput">Input: <span>✎</span></label>
+  <div class="input-wrap">
+    <span class="icon">🔢</span>
+    <input type="text" id="numInput"
+           placeholder="-3.1 × 10^-3   or   2 × 10⁰"
+           autocomplete="off" spellcheck="false"/>
+  </div>
+
+  <div class="examples">
+    <p>✨ Try these examples →</p>
+    <div class="pills">
+      <button class="pill" onclick="fillExample('2 × 10^3')">2 × 10^3</button>
+      <button class="pill" onclick="fillExample('-3.1 × 10^-3')">-3.1 × 10^-3</button>
+      <button class="pill" onclick="fillExample('5.0 × 10⁶')">5.0 × 10⁶</button>
+      <button class="pill" onclick="fillExample('1e-5')">1e-5</button>
+      <button class="pill" onclick="fillExample('2 × 10⁰')">2 × 10⁰</button>
+      <button class="pill" onclick="fillExample('12.5 × 10^2')">12.5 × 10^2 ❌</button>
+    </div>
+  </div>
+
+  <button class="check-btn" onclick="checkNumber()">
+    <span>✦</span> Check! <span>✦</span>
+  </button>
+
+  <div class="result" id="result">
+    <span class="result-emoji" id="resultEmoji"></span>
+    <span id="resultText"></span>
+  </div>
+
+  <hr/>
+  <footer>
+    Created by <strong>Aurelia Setiawan</strong><br/>
+    NIM: 241011060049 · Created for task <strong>Automata</strong>
+  </footer>
+</div>
+
+<script>
+  // ── Same regex pattern as Python code ──
+  const pattern = /^-?(?:[1-9]\d*|0?\.?\d+)\s*(?:[x×]\s*10(?:\^-?\d+|[⁻]?[⁰¹²³⁴⁵⁶⁷⁸⁹]+)|[eE]-?\d+)$/;
+
+  function checkNumber() {
+    const input = document.getElementById('numInput').value.trim();
+    const resultDiv = document.getElementById('result');
+    const resultEmoji = document.getElementById('resultEmoji');
+    const resultText  = document.getElementById('resultText');
+
+    // reset animation
+    resultDiv.classList.remove('show', 'yes', 'no');
+    void resultDiv.offsetWidth; // reflow
+
+    if (input === '') {
+      resultEmoji.textContent = '🤔';
+      resultText.textContent  = 'Please enter a number first!';
+      resultDiv.classList.add('show', 'no');
+      return;
+    }
+
+    if (pattern.test(input)) {
+      resultEmoji.textContent = '🤩';
+      resultText.textContent  = 'Result: YES — Yesss this is a Scientific Number!';
+      resultDiv.classList.add('show', 'yes');
+      launchBalloons();
+    } else {
+      resultEmoji.textContent = '😞';
+      resultText.textContent  = 'Result: NO — no no, not a Scientific Number.';
+      resultDiv.classList.add('show', 'no');
+    }
+  }
+
+  function fillExample(val) {
+    document.getElementById('numInput').value = val;
+    document.getElementById('numInput').focus();
+  }
+
+  // Enter key triggers check
+  document.getElementById('numInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') checkNumber();
+  });
+
+  // ── Balloon animation (same as st.balloons()) ──
+  const BALLOONS = ['🎈','🎀','🎊','🎉','⭐','✨','💜','🩷','💙'];
+  function launchBalloons() {
+    const area = document.getElementById('balloonArea');
+    area.innerHTML = '';
+    for (let i = 0; i < 22; i++) {
+      const b = document.createElement('span');
+      b.className = 'balloon';
+      b.textContent = BALLOONS[Math.floor(Math.random() * BALLOONS.length)];
+      b.style.left  = Math.random() * 100 + 'vw';
+      b.style.animationDuration = (2.5 + Math.random() * 2) + 's';
+      b.style.animationDelay    = (Math.random() * 1.2) + 's';
+      b.style.fontSize = (1.5 + Math.random() * 1.5) + 'rem';
+      area.appendChild(b);
+    }
+    setTimeout(() => area.innerHTML = '', 5000);
+  }
+</script>
+</body>
+</html>
